@@ -47,9 +47,15 @@ locals {
         description = try(rw.rule.description, "")
         enabled     = try(rw.rule.enabled, true)
         action      = try(rw.rule.action.action, "ALLOW")
+        # applications in the export is a wrapper object ({application: [...]});
+        # tolerate the older flat-list-of-wrappers shape as well.
         applications = [
-          for a in try(rw.rule.applications, []) :
-          (can(a.application.name) ? { name = a.application.name } : { id = a.application.id })
+          for a in try(rw.rule.applications.application, rw.rule.applications, []) :
+          (
+            can(a.application) ?
+            (can(a.application.name) ? { name = a.application.name } : { id = a.application.id }) :
+            (can(a.name) ? { name = a.name } : { id = a.id })
+          )
         ]
         source = {
           users = [
@@ -134,6 +140,20 @@ locals {
         }
       } : {}
     )
+  }
+}
+
+# Safety guard: fail planning early if the decoded policy has 0 rules,
+# unless explicitly allowed via var.allow_empty_policy. Catches a truncated
+# export, a renamed upstream JSON key, or a wrong-tenant near-empty file
+# before it silently destroys every live rule. No count/for_each so the
+# precondition always evaluates, even with zero rule instances elsewhere.
+resource "terraform_data" "guard_empty_policy" {
+  lifecycle {
+    precondition {
+      condition     = var.allow_empty_policy || length(local.rules_by_name) > 0
+      error_message = "Policy JSON contains 0 rules. If intentional (greenfield/teardown), set allow_empty_policy = true. A truncated or wrong-tenant export would otherwise destroy the entire live policy."
+    }
   }
 }
 
