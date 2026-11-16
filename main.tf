@@ -157,6 +157,13 @@ resource "terraform_data" "guard_empty_policy" {
   }
 }
 
+# Optional account-level policy toggle. null leaves the toggle unmanaged (count 0);
+# true/false manages the account-wide Private Access enable/disable state.
+resource "cato_private_access_policy" "policy" {
+  count   = var.policy_enabled == null ? 0 : 1
+  enabled = var.policy_enabled
+}
+
 resource "cato_private_access_rule" "rules" {
   for_each = local.rules_by_name
 

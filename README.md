@@ -1,5 +1,12 @@
 # Terraform Cato Bulk Private Access Rules Module
 
+> [!IMPORTANT]
+> **Early access (beta).** This module targets the Cato Terraform provider
+> `2.0.0-prerelease.1`, an **early-access / beta** release. A general-availability
+> (GA) release is planned shortly, following the current evaluation period.
+> Until GA ships, pin the exact prerelease version.
+
+
 This module allows you to bulk import Private Access (PA) rules from a JSON configuration file, and define the order of those rules within the Cato policy.
 
 ## Usage
@@ -124,6 +131,7 @@ Since this rule type has no sections or sub-policies, ordering is a single flat 
 ### Parameters
 
 - `pa_rules_json_file_path`: Path to your JSON configuration file
+- `policy_enabled`: (Optional, default `null`) Account-level policy toggle. `null` leaves it unmanaged (resource not created); `true`/`false` manages it via `cato_private_access_policy`.
 - `allow_empty_policy`: (Optional) Safety guard - fails planning if the decoded JSON contains 0 rules, since that almost always means a truncated export, a renamed upstream JSON key, or an accidentally wrong-tenant JSON file. Set `true` only for an intentional greenfield/teardown config.
 
 ## Working with Existing Rules (Brownfield Deployments)
@@ -324,13 +332,13 @@ These example outputs demonstrate various practical applications:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 1.3.1 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 2.0.0-prerelease.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 1.3.1 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 2.0.0-prerelease.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -350,6 +358,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_allow_empty_policy"></a> [allow\_empty\_policy](#input\_allow\_empty\_policy) | Safety guard: fail planning when the policy JSON contains 0 rules unless explicitly allowed. Protects against a truncated or wrong-tenant export destroying the live policy. Set true only for intentional greenfield/teardown. | `bool` | `false` | no |
+| <a name="input_policy_enabled"></a> [policy\_enabled](#input\_policy\_enabled) | Manage the account-level Private Access policy toggle. null leaves the toggle unmanaged; true/false manages it via cato\_private\_access\_policy. | `bool` | `null` | no |
 | <a name="input_pa_rules_json_file_path"></a> [pa\_rules\_json\_file\_path](#input\_pa\_rules\_json\_file\_path) | Path to the Private Access JSON export produced by `catocli export pa_rules` (data.policy.privateAccess.policy root). | `string` | n/a | yes |
 
 ## Outputs

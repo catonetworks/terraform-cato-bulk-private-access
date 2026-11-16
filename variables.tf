@@ -1,3 +1,9 @@
+variable "policy_enabled" {
+  description = "Manage the account-level Private Access policy toggle. null leaves the toggle unmanaged; true/false manages it via cato_private_access_policy."
+  type        = bool
+  default     = null
+}
+
 variable "allow_empty_policy" {
   type        = bool
   default     = false
